@@ -2,6 +2,15 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 
+// // server test
+// const path = require('path');
+// app.use(express.static(path.join(__dirname, '../build')));
+
+// app.get('/', (res, req)=>{
+//     req.sendFile(path.join(__dirname, '../build/index.html'));
+// }) // server에서 html파일을 static하게 뿌려주고 싶으면 다음과 같이 사용하면 된다.
+// //
+
 app.use(express.json());
 app.use(cors());
 
@@ -24,13 +33,26 @@ var api_url = 'https://openapi.naver.com/v1/datalab/search';
 const food_api_url = 'https://api.odcloud.kr/api/15035732/v1/uddi:ba47232a-68fb-4252-93e8-fef2699919cc_201909091317?';
 const food_api_key = process.env.FOOD_API_KEY_DECODING;
 
-app.get('/foodlist', (req, res) => {
-    request(food_api_url+'serviceKey='+food_api_key, (error, respond, body) => {
+app.get('/foodlist', async (req, res) => {
+    // 이부분 async await로 비동기 처리를 해줘야 된다
+    // 그 다음 푸드리스트를 불러오는 부분 함수화해서 model 폴더에 구현해주자
+    let page=1;
+    let perPage=100;
+    let offset;
+    const req_url = food_api_url+'page='+page+'&perPage='+perPage+'&serviceKey='+food_api_key;
+    // request(food_api_url+'serviceKey='+food_api_key, (error, respond, body) => {
+    request(req_url, (error, respond, body) => {
         if(error) console.log(error);
         var obj = JSON.parse(body)
         console.log(obj);
+        offset = obj.totalCount;
         res.send(obj)
     })
+    .then(() => {
+        page++;
+        console.log(page+" and "+offset);
+    })
+    
 })
 
 
