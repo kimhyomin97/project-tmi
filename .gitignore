@@ -40,3 +40,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 개인 문서 (공개 레포 제외)
+/docs/private/
+
+# Claude Code 개인 설정·hook 상태
+/.claude/settings.local.json
+/.claude/.state/
+/CLAUDE.local.md
