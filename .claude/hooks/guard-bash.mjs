@@ -2,7 +2,7 @@
 /**
  * PreToolUse(Bash) hook: 권한 패턴만으로는 막히지 않는 git 조작을 차단한다.
  *
- * - 일반 `git push`는 허용하되, force / mirror / 원격 브랜치 삭제는 사용자 전용이다.
+ * - 일반 `git push`와 작업 브랜치 삭제는 허용한다. force / mirror와 main·아카이브 삭제는 사용자 전용이다.
  *   권한 패턴은 `git -C . push --force` 같은 형태를 잡지 못하므로 명령 문자열 전체를 검사한다.
  * - 아카이브 브랜치에서는 commit / merge를 막는다. 작업은 main에서 직접 한다.
  *
@@ -47,20 +47,34 @@ const gitSubcommand = (seg) => {
 };
 const parsed = gitSegments.map(gitSubcommand);
 
-// 일반 push는 허용한다. 히스토리를 덮어쓰거나 원격 브랜치를 지우는 형태만 막는다.
-const DESTRUCTIVE_FLAG = /^(?:--force(?:-with-lease)?(?:=.*)?|-f|--mirror|--delete|-d)$/;
-const isDestructiveArg = (a) =>
-  DESTRUCTIVE_FLAG.test(a) ||
-  /^:[^:]+$/.test(a) || // git push origin :branch (원격 삭제)
-  /^\+[^:]/.test(a); // git push origin +main (force refspec)
+// 일반 push와 작업 브랜치 삭제는 허용한다.
+// 히스토리를 덮어쓰는 push(force / mirror)와 main·아카이브 브랜치 삭제만 막는다.
+const KEEP_REMOTE = new Set(["main", "master", ...PROTECTED]);
+const FORCE_FLAG = /^(?:--force(?:-with-lease)?(?:=.*)?|-f|--mirror)$/;
+const DELETE_FLAG = /^(?:--delete|-d)$/;
+const stripRef = (r) => r.replace(/^:/, "").replace(/^refs\/heads\//, "");
 
-const badPush = parsed.find((p) => p.sub === "push" && p.args.some(isDestructiveArg));
-if (badPush) {
-  process.stderr.write(
-    "force push / mirror / 원격 브랜치 삭제는 사용자가 직접 실행합니다. " +
-      "일반 push는 허용됩니다. 히스토리를 덮어써야 하는 이유를 설명하고 사용자에게 맡기세요.\n",
-  );
-  process.exit(2);
+for (const p of parsed.filter((q) => q.sub === "push")) {
+  if (p.args.some((a) => FORCE_FLAG.test(a) || /^\+[^:]/.test(a))) {
+    process.stderr.write(
+      "force push / mirror는 히스토리를 덮어쓰므로 사용자가 직접 실행합니다. " +
+        "덮어써야 하는 이유를 설명하고 사용자에게 맡기세요.\n",
+    );
+    process.exit(2);
+  }
+  // 삭제 대상: `--delete <remote> <br...>` 의 브랜치들, 또는 `:br` refspec
+  const positional = p.args.filter((a) => !a.startsWith("-"));
+  const deleting = p.args.some((a) => DELETE_FLAG.test(a))
+    ? positional.slice(1) // 첫 번째는 remote 이름
+    : positional.filter((a) => /^:[^:]+$/.test(a));
+  const guarded = deleting.map(stripRef).filter((b) => KEEP_REMOTE.has(b));
+  if (guarded.length) {
+    process.stderr.write(
+      `원격 '${guarded.join(", ")}' 브랜치는 삭제하지 않습니다(main·아카이브 보호). ` +
+        "작업 브랜치 삭제는 허용됩니다.\n",
+    );
+    process.exit(2);
+  }
 }
 
 const wantsCommitOrMerge = parsed.some((p) => p.sub === "commit" || p.sub === "merge");

@@ -103,7 +103,8 @@ pnpm verify       # check + build — Stop hook이 자동 실행. 완료 보고 
 ## Git
 
 - **작업은 `main`에서 직접 한다. 작업 브랜치(`feat/…` 등)를 따로 만들지 않는다.** 사용자가 명시적으로 요청할 때만 브랜치를 만든다.
-- 커밋 후 `main` push까지 AI가 한다. force push·mirror·원격 브랜치 삭제는 hook이 차단한다(사용자 전용).
+- 커밋 후 `main` push까지 AI가 한다. git 정리(작업 브랜치 삭제 등)도 사용자에게 넘기지 말고 AI가 처리한다.
+- hook이 막는 것은 force push·mirror와 main·아카이브 브랜치 삭제뿐이다(사용자 전용).
 - 워킹트리에 사용자의 변경이 있으면 `stash`/`reset`/`checkout .`로 버리지 않는다.
 - 커밋 메시지: `feat:`·`fix:`·`chore:`·`refactor:` prefix의 한국어 요약. 커밋을 squash하거나 rebase로 합치지 않는다(`Learn:` trailer 보존).
 - `legacy_v1`/`v2`/`v3`/`hyomin`은 `main`과 **공통 조상이 없는** 2021~2024 아카이브다. 체크아웃·머지·참조 구현 어디에도 쓰지 않는다(커밋/머지는 hook이 차단).
