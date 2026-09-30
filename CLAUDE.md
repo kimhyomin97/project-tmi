@@ -104,7 +104,7 @@ pnpm verify       # check + build — Stop hook이 자동 실행. 완료 보고 
 
 - 기준 브랜치는 `main`이며 PR base도 항상 `main`이다. 작업은 `feat/…`·`fix/…`·`chore/…` 브랜치에서 한다(보호 브랜치 커밋은 hook이 차단).
 - 현재 브랜치가 보호 브랜치면 먼저 `git switch -c feat/<이름>`으로 옮긴다. **워킹트리 변경은 그대로 들고 옮긴다** — `stash`/`reset`/`checkout .`로 사용자의 변경을 버리지 않는다.
-- push와 merge는 사용자가 한다(hook이 push를 차단한다). 커밋까지만 하고 보고한다.
+- 작업 브랜치의 push는 AI가 한다. force push·mirror·원격 브랜치 삭제는 hook이 차단한다(사용자 전용). merge는 사용자가 한다.
 - 커밋 메시지: `feat:`·`fix:`·`chore:`·`refactor:` prefix의 한국어 요약. merge 시 squash하지 않는다(`Learn:` trailer 보존).
 - `legacy_v1`/`v2`/`v3`/`hyomin`은 `main`과 **공통 조상이 없는** 2021~2024 아카이브다. 체크아웃·머지·PR base·참조 구현 어디에도 쓰지 않는다.
 

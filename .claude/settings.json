@@ -14,7 +14,8 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git switch *)",
-      "Bash(git restore *)"
+      "Bash(git restore *)",
+      "Bash(git push *)"
     ],
     "deny": [
       "Read(./.env)",
@@ -23,9 +24,7 @@
       "Read(./.env.production)",
       "Read(./.env.*.local)",
       "Edit(./src/components/ui/**)",
-      "Write(./src/components/ui/**)",
-      "Bash(git push)",
-      "Bash(git push *)"
+      "Write(./src/components/ui/**)"
     ]
   },
   "hooks": {

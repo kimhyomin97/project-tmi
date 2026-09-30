@@ -2,8 +2,8 @@
 /**
  * PreToolUse(Bash) hook: 권한 패턴만으로는 막히지 않는 git 조작을 차단한다.
  *
- * - `git push`는 사용자 전용이다. deny 패턴 `Bash(git push *)`는 `git -C . push`,
- *   `git -c k=v push` 같은 형태를 잡지 못하므로 명령 문자열 전체를 검사한다.
+ * - 일반 `git push`는 허용하되, force / mirror / 원격 브랜치 삭제는 사용자 전용이다.
+ *   권한 패턴은 `git -C . push --force` 같은 형태를 잡지 못하므로 명령 문자열 전체를 검사한다.
  * - 보호 브랜치(main, 아카이브들)에서는 commit / merge를 막는다. 작업은 feature 브랜치에서.
  *
  * exit 2 = 도구 호출 차단. stderr가 Claude에게 전달된다.
@@ -31,17 +31,38 @@ const segments = command.split(/[;&|]+/);
 const gitSegments = segments.filter((s) => RUNS_GIT.test(s));
 if (gitSegments.length === 0) process.exit(0);
 
-const hasVerb = (seg, verb) => new RegExp(`\\b${verb}\\b`).test(seg.replace(/--\S*/g, ""));
+// git 서브커맨드(= git 뒤 첫 번째 비옵션 토큰)를 판별한다. 세그먼트 전체에서 단어를
+// 찾으면 `git commit -m "... push --force ..."`처럼 메시지에 언급만 해도 오인한다.
+const OPTS_WITH_VALUE = new Set(["-C", "-c", "--git-dir", "--work-tree", "--namespace"]);
+const gitSubcommand = (seg) => {
+  const toks = seg.trim().split(/\s+/);
+  let i = toks.findIndex((t) => /(^|[/\\])git(\.exe)?$/.test(t));
+  if (i < 0) return { sub: null, args: [] };
+  i += 1;
+  while (i < toks.length && toks[i].startsWith("-")) {
+    i += OPTS_WITH_VALUE.has(toks[i]) ? 2 : 1;
+  }
+  return { sub: toks[i] ?? null, args: toks.slice(i + 1) };
+};
+const parsed = gitSegments.map(gitSubcommand);
 
-if (gitSegments.some((s) => hasVerb(s, "push"))) {
+// 일반 push는 허용한다. 히스토리를 덮어쓰거나 원격 브랜치를 지우는 형태만 막는다.
+const DESTRUCTIVE_FLAG = /^(?:--force(?:-with-lease)?(?:=.*)?|-f|--mirror|--delete|-d)$/;
+const isDestructiveArg = (a) =>
+  DESTRUCTIVE_FLAG.test(a) ||
+  /^:[^:]+$/.test(a) || // git push origin :branch (원격 삭제)
+  /^\+[^:]/.test(a); // git push origin +main (force refspec)
+
+const badPush = parsed.find((p) => p.sub === "push" && p.args.some(isDestructiveArg));
+if (badPush) {
   process.stderr.write(
-    "git push는 사용자가 직접 실행합니다(CLAUDE.md: push와 merge는 사용자가 한다). " +
-      "커밋까지만 하고, 변경 내용을 증거와 함께 보고하세요.\n",
+    "force push / mirror / 원격 브랜치 삭제는 사용자가 직접 실행합니다. " +
+      "일반 push는 허용됩니다. 히스토리를 덮어써야 하는 이유를 설명하고 사용자에게 맡기세요.\n",
   );
   process.exit(2);
 }
 
-const wantsCommitOrMerge = gitSegments.some((s) => hasVerb(s, "commit") || hasVerb(s, "merge"));
+const wantsCommitOrMerge = parsed.some((p) => p.sub === "commit" || p.sub === "merge");
 if (!wantsCommitOrMerge) process.exit(0);
 
 let branch = "";
