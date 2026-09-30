@@ -4,14 +4,15 @@
  *
  * - 일반 `git push`는 허용하되, force / mirror / 원격 브랜치 삭제는 사용자 전용이다.
  *   권한 패턴은 `git -C . push --force` 같은 형태를 잡지 못하므로 명령 문자열 전체를 검사한다.
- * - 보호 브랜치(main, 아카이브들)에서는 commit / merge를 막는다. 작업은 feature 브랜치에서.
+ * - 아카이브 브랜치에서는 commit / merge를 막는다. 작업은 main에서 직접 한다.
  *
  * exit 2 = 도구 호출 차단. stderr가 Claude에게 전달된다.
  */
 import fs from "node:fs";
 import { execSync } from "node:child_process";
 
-const PROTECTED = ["main", "master", "v3", "v2", "legacy_v1", "hyomin"];
+// 2021~2024 구버전 아카이브. main은 작업 브랜치이므로 포함하지 않는다.
+const PROTECTED = ["v3", "v2", "legacy_v1", "hyomin"];
 
 let input = {};
 try {
@@ -77,8 +78,8 @@ try {
 
 if (PROTECTED.includes(branch)) {
   process.stderr.write(
-    `현재 브랜치가 '${branch}'입니다. 보호 브랜치에는 직접 커밋/머지하지 않습니다.\n` +
-      `먼저 작업 브랜치로 옮기세요: git switch -c feat/<이름>  (워킹트리 변경은 그대로 따라갑니다. ` +
+    `현재 브랜치가 '${branch}'입니다. 구버전 아카이브 브랜치에는 커밋/머지하지 않습니다.\n` +
+      `main으로 돌아가 작업하세요: git switch main  (워킹트리 변경이 있으면 먼저 사용자에게 알리고, ` +
       `stash/reset/checkout . 로 사용자의 변경을 버리지 마세요.)\n`,
   );
   process.exit(2);
