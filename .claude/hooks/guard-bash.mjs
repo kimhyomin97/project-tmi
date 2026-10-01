@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * PreToolUse(Bash) hook: 권한 패턴만으로는 막히지 않는 git 조작을 차단한다.
+ * PreToolUse(Bash|PowerShell) hook: 권한 패턴만으로는 막히지 않는 git 조작을 차단한다.
+ * 두 셸 도구 모두 tool_input.command로 명령 문자열을 넘긴다.
  *
  * - 일반 `git push`와 작업 브랜치 삭제는 허용한다. force / mirror와 main·아카이브 삭제는 사용자 전용이다.
  *   권한 패턴은 `git -C . push --force` 같은 형태를 잡지 못하므로 명령 문자열 전체를 검사한다.
@@ -28,7 +29,13 @@ if (typeof command !== "string" || !command.trim()) process.exit(0);
 // 세그먼트가 실제로 git을 "실행"할 때만 본다. 문자열 안에 git 명령이 인용된 경우
 // (문서 작성, echo, heredoc 등)까지 막으면 거짓 양성이 많아진다.
 const RUNS_GIT = /^\s*(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*(?:\S*[/\\])?git(?:\.exe)?\s/;
-const segments = command.split(/[;&|]+/);
+// heredoc / here-string 본문(커밋 메시지 등)은 실행되는 명령이 아니므로 먼저 걷어낸다.
+const withoutBodies = command
+  .replace(/<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*?\n\s*\2[ \t]*(?=\n|$)/g, "")
+  .replace(/@'[\s\S]*?\n'@/g, "")
+  .replace(/@"[\s\S]*?\n"@/g, "");
+// 줄바꿈도 명령 구분자다. 빠뜨리면 "cd x<줄바꿈>git push --force"가 첫 줄만 검사되고 통과한다.
+const segments = withoutBodies.split(/[;&|\r\n]+/);
 const gitSegments = segments.filter((s) => RUNS_GIT.test(s));
 if (gitSegments.length === 0) process.exit(0);
 

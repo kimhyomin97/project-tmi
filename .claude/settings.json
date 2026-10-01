@@ -6,15 +6,17 @@
       "Bash(pnpm typecheck)",
       "Bash(pnpm build)",
       "Bash(pnpm verify)",
-      "Bash(pnpm dlx shadcn@latest add *)",
+      "Bash(pnpm install)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm shadcn add *)",
       "Bash(git status *)",
+      "Bash(git grep *)",
       "Bash(git diff *)",
       "Bash(git log *)",
       "Bash(git branch *)",
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git switch *)",
-      "Bash(git restore *)",
       "Bash(git push *)"
     ],
     "deny": [
@@ -30,7 +32,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Bash|PowerShell",
         "hooks": [
           {
             "type": "command",
