@@ -1,5 +1,3 @@
-import { env } from "@/lib/env";
-
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -16,14 +14,18 @@ type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
 /**
  * 모든 BE API 호출은 이 클라이언트를 통해서만 한다.
  * 컴포넌트에서 fetch를 직접 호출하지 않는다.
+ *
+ * path는 같은 출처 경로(`/api/v1/...`)다. next.config.ts의 rewrites가 BE로 중계하므로
+ * 브라우저(클라이언트 컴포넌트)에서만 호출한다.
  */
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { body, headers, ...rest } = options;
 
-  const res = await fetch(`${env.apiBaseUrl}${path}`, {
+  const res = await fetch(path, {
     ...rest,
     headers: {
-      "Content-Type": "application/json",
+      // body가 있을 때만 붙인다. GET에 application/json을 붙이면 불필요한 CORS preflight가 생긴다.
+      ...(body !== undefined && { "Content-Type": "application/json" }),
       ...headers,
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
