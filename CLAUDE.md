@@ -47,14 +47,16 @@ Next.js 16 App Router · React 19 · TS · TanStack Query v5 · Zustand · Tailw
 ```
 src/
 ├── app/                  # 라우팅만. page.tsx는 feature 컴포넌트 조립만
+│   └── (console)/        # 사이드바 셸(layout.tsx)과 에러 안전망(error.tsx). 모든 화면은 이 안에
 ├── features/<name>/      # 작성 순서: types → api → queries → components
 │   ├── types.ts          # BE 요청/응답 타입
 │   ├── api.ts            # BE 호출. apiClient 사용, 스트리밍만 raw fetch
 │   ├── queries.ts        # TanStack Query 훅 + queryKey (["<feature>", ...] 리터럴로 정의)
 │   ├── components/
 │   └── store.ts          # (필요 시) Zustand
-├── components/ui/        # shadcn 생성물 — 수정 금지(Bash로도). 변형은 감싸는 컴포넌트로
-└── lib/  api/client.ts(유일한 HTTP 클라이언트) · env.ts(NEXT_PUBLIC_만) · env.server.ts(필요 시) · providers.tsx
+├── components/           # 공용: page-header · app-sidebar · nav-link
+│   └── ui/               # shadcn 생성물 — 수정 금지(Bash로도). 변형은 감싸는 컴포넌트로
+└── lib/  api/client.ts(유일한 HTTP 클라이언트) · env.ts(NEXT_PUBLIC_만) · env.server.ts(필요 시) · providers.tsx · console-menu.ts(메뉴 목록)
 ```
 위반은 ESLint가 잡는다(메시지가 대안을 알려준다).
 
@@ -64,9 +66,18 @@ src/
 - 서버 전용 환경변수는 `lib/env.server.ts`에 두고 최상단에 `import "server-only";`(패키지 설치 필요). 비밀값은 되도록 BE에서 처리한다. 새 변수는 `.env.example`에도 추가한다.
 - 새 UI는 먼저 `pnpm shadcn add <component>`. shadcn이 생성물과 함께 추가하는 `cn` 패키지는 shadcn 공식 의존성이므로 그대로 받아들인다(별도 승인 불필요, 보고에는 적는다).
 
+## 디자인 시스템
+
+- **색은 `globals.css`의 의미 토큰만** 쓴다(background·foreground·card·muted·primary·secondary·accent·destructive·success·warning·border). 원시 팔레트(`bg-red-500`)·임의 값(`text-[13px]`)·`style` 속성은 lint가 막는다. 필요한 토큰이 없으면 즉석에서 만들지 말고 plan에 "토큰 추가"로 올린다.
+- 대표색(primary)은 화면의 주 행동 버튼 하나와 활성 상태에만 쓴다. 상태색(success·warning·destructive)은 의미를 전할 때만 쓰고, **색만으로 전하지 않는다**(아이콘이나 글자를 함께: ✓ 정답, ▲ 3점).
+- 모든 화면은 `PageHeader`로 시작한다. 표·금액·시간 같은 숫자는 `tabular-nums`, 숫자 열은 오른쪽 정렬.
+- **데이터 영역은 3상태를 모두 그린다**: 로딩은 Skeleton, 빈 상태는 Empty(다음 행동 버튼 하나), 실패는 영역 안 Alert + "다시 시도"(`refetch`). 결과 알림은 toast, 지속되는 문제는 Alert. 필요한 shadcn 컴포넌트는 처음 쓸 때 추가한다.
+- **문구**: 합니다체. 버튼은 무슨 일이 일어나는지 동사로("채점하기"). 오류는 무엇이 잘못됐고 어떻게 고치는지 쓰고, 사과·모호한 말은 쓰지 않는다.
+- **날짜·숫자 표기는 `src/lib/format.ts` 하나에서만**(처음 필요할 때 만든다): `Intl` ko-KR, `timeZone: "Asia/Seoul"` 고정, 만·억 축약은 내림(9,999원이 "1만"이 되지 않게).
+
 ## 새 feature
 
-- 사이드바에 메뉴를 추가한다. **사이드바 셸(`src/app/(console)/layout.tsx`)이 없으면 직접 만들지 말고 plan에 별도 항목으로 올려 승인받는다.**
+- 화면은 `src/app/(console)/<route>/`에 만들고, 메뉴는 `src/lib/console-menu.ts`의 해당 항목에 `href`를 채운다(사이드바와 홈 카드가 함께 바뀐다).
 
 ## Git
 
