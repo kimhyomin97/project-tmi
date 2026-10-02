@@ -7,6 +7,8 @@ import type { NextConfig } from "next";
 const coreApiUrl = process.env.CORE_API_URL ?? "http://localhost:8080";
 
 const nextConfig: NextConfig = {
+  // 없는 주소로 링크하면 typecheck에서 잡는다(메뉴 href 오타가 흰 404 화면으로 이어지는 것을 막음).
+  typedRoutes: true,
   async rewrites() {
     return [{ source: "/api/v1/:path*", destination: `${coreApiUrl}/api/v1/:path*` }];
   },

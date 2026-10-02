@@ -1,4 +1,6 @@
-@import "tailwindcss";
+/* 클래스 스캔을 src로 한정한다. 기본값은 저장소 전체라, 문서·lint 설정에 "금지 예시"로 적은
+   text-[13px]·bg-[#f00] 같은 클래스까지 CSS에 생성돼 런타임 조립으로 실제 적용되는 구멍이 있었다. */
+@import "tailwindcss" source("../");
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 /* 한국어 웹폰트. 동적 서브셋이라 화면에 쓰인 글자 묶음만 받는다(실측 첫 방문 약 0.18MB) */
@@ -9,7 +11,8 @@
 /*
  * 디자인 시스템: Tailwind 기본 색 팔레트(red-500, zinc-900 등)를 지운다.
  * 색은 아래 @theme inline의 의미 토큰(primary, muted, success…)으로만 쓴다.
- * 임의 값(bg-[#fff], text-[13px])은 eslint-plugin-tailwindcss가 막는다.
+ * 임의 값·원시 색은 eslint의 tmi/no-raw-design-values가 소스의 모든 문자열에서 막는다.
+ * 여기에 @utility나 새 클래스를 추가하는 것도 토큰 추가다(plan 승인 대상, lint로는 못 막음).
  */
 @theme {
   --color-*: initial;
@@ -24,7 +27,10 @@
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-pretendard);
   --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -85,6 +91,10 @@
   /* 상태색: 의미를 전할 때만 쓴다(대표색과 별개). #15803d / #b45309, 흰 배경 대비 5.02:1 */
   --success: oklch(0.527 0.137 150.07);
   --warning: oklch(0.555 0.146 49);
+  /* 상태색으로 채운 배경 위 글자. 라이트는 흰 글자(4.5:1 이상) */
+  --success-foreground: oklch(0.985 0 0);
+  --warning-foreground: oklch(0.985 0 0);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.546 0.215 262.88);
@@ -105,6 +115,8 @@
 }
 
 .dark {
+  /* 스크롤바·날짜 선택·체크박스 같은 브라우저 기본 UI도 다크로 그린다 */
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -124,6 +136,10 @@
   /* #4ade80 / #fbbf24, 카드 배경 대비 10:1 이상 */
   --success: oklch(0.8 0.182 151.71);
   --warning: oklch(0.837 0.164 84.43);
+  /* 다크는 짙은 글자(6.8:1 이상). 흰 글자는 1.6~2.8:1로 읽히지 않는다 */
+  --success-foreground: oklch(0.145 0 0);
+  --warning-foreground: oklch(0.145 0 0);
+  --destructive-foreground: oklch(0.145 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.714 0.143 254.62);

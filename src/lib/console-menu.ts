@@ -1,10 +1,12 @@
 // 콘솔 메뉴 정의. 사이드바와 홈 화면이 같은 목록을 쓴다.
 // href가 없는 항목은 아직 화면이 없는 기능이다(링크하지 않고 "준비 중"으로 표시).
+// href는 Route 타입이라, 실제로 없는 화면 주소를 넣으면 typecheck가 실패한다(next.config.ts typedRoutes).
+import type { Route } from "next";
 
 export type ConsoleMenuItem = {
   label: string;
   description: string;
-  href?: string;
+  href?: Route;
 };
 
 export const consoleHome: ConsoleMenuItem = {

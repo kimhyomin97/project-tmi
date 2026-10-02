@@ -10,8 +10,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TMI Console",
-  description: "Personal console for project-tmi backend services",
+  // 화면마다 metadata.title을 주면 "영어 학습 · TMI 콘솔"처럼 탭 제목이 구분된다.
+  title: { template: "%s · TMI 콘솔", default: "TMI 콘솔" },
+  description: "project-tmi 백엔드 서비스를 한곳에서 쓰는 개인 콘솔",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

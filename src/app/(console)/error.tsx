@@ -4,6 +4,7 @@
 import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
 
 export default function ConsoleError({
   error,
@@ -19,13 +20,15 @@ export default function ConsoleError({
     console.error(error);
   }, [error]);
 
+  // 대부분 코드 버그라 다시 해도 같은 결과가 나온다. 원인을 찾을 단서를 준다.
+  // 서버 오류는 메시지 원문 대신 digest만 오므로(원문이 화면에 새지 않음) 로그 검색 방법을 알려준다.
+  const description = error.digest
+    ? `화면을 그리는 중 오류가 났습니다. 서버 로그에서 오류 코드 ${error.digest}를 검색하면 원인을 볼 수 있습니다.`
+    : `화면을 그리는 중 오류가 났습니다: ${error.message}`;
+
   return (
-    <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-border bg-card p-6">
-      <h2 className="text-lg font-bold">화면을 표시하지 못했습니다</h2>
-      <p className="text-sm text-muted-foreground">
-        일시적인 문제일 수 있습니다. 다시 시도해도 같으면 새로고침해 주세요.
-        {error.digest ? ` (오류 코드: ${error.digest})` : null}
-      </p>
+    <div role="alert" className="flex flex-col items-start gap-4">
+      <PageHeader title="화면을 표시하지 못했습니다" description={description} />
       <Button
         onClick={() => {
           resetQueries();

@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/page-header";
 import { consoleFeatures, consoleHome } from "@/lib/console-menu";
+
+export const metadata: Metadata = { title: "홈" };
 
 export default function HomePage() {
   return (
