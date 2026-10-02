@@ -2,6 +2,7 @@ import path from "node:path";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import tailwindcss from "eslint-plugin-tailwindcss";
 
 /**
  * 로컬 규칙: feature 간 직접 import 금지 (CLAUDE.md 아키텍처 규칙).
@@ -114,6 +115,12 @@ const PROCESS_ENV_SELECTOR = {
   message: "process.env는 src/lib/env.ts(공개) 또는 src/lib/env.server.ts(서버 전용)에서만 읽습니다.",
 };
 
+// 디자인 시스템: 인라인 style로 토큰을 우회하지 못하게 한다.
+const NO_STYLE_PROP = {
+  selector: "JSXAttribute[name.name='style']",
+  message: "style 속성 대신 Tailwind 클래스(디자인 토큰)를 씁니다. 필요한 값이 없으면 globals.css의 @theme에 토큰을 추가하세요.",
+};
+
 // 소스 전체에 적용할 확장자. .js/.jsx가 빠져 있으면 그 파일만 규칙을 통째로 우회한다.
 const SRC_FILES = ["src/**/*.{ts,tsx,js,jsx,mjs,cjs}"];
 
@@ -130,10 +137,26 @@ const eslintConfig = defineConfig([
     plugins: { tmi: { rules: { "no-cross-feature-import": noCrossFeatureImport } } },
     rules: {
       "tmi/no-cross-feature-import": "error",
-      "no-restricted-syntax": ["error", PROCESS_ENV_SELECTOR],
+      "no-restricted-syntax": ["error", PROCESS_ENV_SELECTOR, NO_STYLE_PROP],
       "no-restricted-globals": ["error", NO_PROCESS, ...NO_NETWORK_GLOBALS],
       "no-restricted-properties": ["error", ...NO_BYPASS_PROPERTIES],
       "no-restricted-imports": ["error", NO_OFF_STACK_IMPORTS],
+    },
+  },
+  {
+    // 디자인 시스템 강제: globals.css에 정의된 토큰으로 만든 클래스만 허용한다.
+    // (src/components/ui/**는 shadcn 생성물이라 아래 globalIgnores로 제외됨 — 생성물 자체가 임의 값을 쓴다)
+    files: SRC_FILES,
+    // cn() 헬퍼는 클래스를 합칠 뿐 클래스가 없다. clsx(inputs)의 변수명을 클래스로 오인하는 거짓 양성이 있어 제외.
+    ignores: ["src/lib/utils.ts"],
+    plugins: { tailwindcss },
+    settings: { tailwindcss: { cssConfigPath: "./src/app/globals.css" } },
+    rules: {
+      // text-[13px], bg-[#fff] 같은 임의 값 금지 → 토큰을 쓰거나 @theme에 추가
+      "tailwindcss/no-arbitrary-value": "error",
+      // 존재하지 않는 클래스 금지(지운 원시 팔레트 bg-red-500 등도 여기서 걸린다)
+      "tailwindcss/no-custom-classname": ["error", { whitelist: ["dark"] }],
+      "tailwindcss/no-contradicting-classname": "error",
     },
   },
   {

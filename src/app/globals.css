@@ -6,6 +6,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * 디자인 시스템: Tailwind 기본 색 팔레트(red-500, zinc-900 등)를 지운다.
+ * 색은 아래 @theme inline의 의미 토큰(primary, muted, success…)으로만 쓴다.
+ * 임의 값(bg-[#fff], text-[13px])은 eslint-plugin-tailwindcss가 막는다.
+ */
+@theme {
+  --color-*: initial;
+  --color-white: #fff;
+  --color-black: #000;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
