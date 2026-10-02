@@ -17,6 +17,7 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git switch *)",
+      "Bash(git clean -f -- src/components/ui/*)",
       "Bash(git push *)"
     ],
     "deny": [
