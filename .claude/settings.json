@@ -8,6 +8,8 @@
       "Bash(pnpm verify)",
       "Bash(pnpm install)",
       "Bash(pnpm dev)",
+      "Bash(pnpm shot)",
+      "Bash(pnpm shot *)",
       "Bash(pnpm shadcn add *)",
       "Bash(git status *)",
       "Bash(git grep *)",

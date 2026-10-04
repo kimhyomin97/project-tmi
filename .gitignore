@@ -49,3 +49,6 @@ next-env.d.ts
 /.claude/.state/
 /CLAUDE.local.md
 /.claude/worktrees/
+
+# pnpm shot 결과(스크린샷·측정). Stop hook이 코드 변경으로 착각하지 않게 제외
+/.shots/
