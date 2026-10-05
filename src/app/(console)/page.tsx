@@ -16,7 +16,10 @@ export default function HomePage() {
           const card = (
             <Card className={item.href ? "h-full hover:bg-accent" : "h-full"}>
               <CardHeader>
-                <CardTitle>{item.label}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <item.icon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                  {item.label}
+                </CardTitle>
                 {item.href ? null : (
                   <CardAction>
                     <Badge variant="outline">준비 중</Badge>

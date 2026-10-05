@@ -1,36 +1,58 @@
-import { Badge } from "@/components/ui/badge";
-import { NavLink } from "@/components/nav-link";
+import { Boxes } from "lucide-react";
+import { MobileNav } from "@/components/mobile-nav";
+import { NavLink, PendingNavItem } from "@/components/nav-link";
+import { SidebarFrame, SidebarToggle } from "@/components/sidebar-collapse";
 import { consoleFeatures, consoleHome } from "@/lib/console-menu";
 
-// 콘솔 사이드바. 서버 컴포넌트이고, 활성 메뉴 판정만 NavLink(client)가 맡는다.
+// 콘솔 사이드바. 서버 컴포넌트이고, 상태가 필요한 부분(활성 메뉴·접기·모바일 서랍)만 client 부품이 맡는다.
+// 같은 메뉴 목록(SidebarNav)을 데스크톱 사이드바와 모바일 서랍이 함께 쓴다.
 export function AppSidebar() {
   return (
-    <aside className="border-b border-sidebar-border bg-sidebar text-sidebar-foreground md:w-60 md:shrink-0 md:border-r md:border-b-0">
-      <div className="flex items-center gap-2 px-5 py-4 text-sm font-bold">
-        {/* 로고는 장식이라 대표색을 쓰지 않는다(대표색은 주 행동과 활성 상태에만). */}
-        <span aria-hidden="true" className="size-5 rounded-md bg-foreground" />
-        TMI 콘솔
-      </div>
-      <nav aria-label="주 메뉴" className="overflow-x-auto px-3 pb-3 md:overflow-visible">
-        <ul className="flex gap-1 md:flex-col">
-          <li className="shrink-0">
-            <NavLink href={consoleHome.href ?? "/"}>{consoleHome.label}</NavLink>
-          </li>
-          {consoleFeatures.map((item) => (
-            <li key={item.label} className="shrink-0">
+    <>
+      <MobileNav logo={<Logo />}>
+        <SidebarNav />
+      </MobileNav>
+      <SidebarFrame>
+        {/* 접기 버튼은 위쪽에 둔다. 왼쪽 아래는 dev 모드에서 Next 개발 표시가 덮는다. */}
+        <div className="flex items-center justify-between gap-2 py-3 pr-3 pl-5 group-data-collapsed/sidebar:flex-col group-data-collapsed/sidebar:px-0">
+          <Logo />
+          <SidebarToggle />
+        </div>
+        <SidebarNav />
+      </SidebarFrame>
+    </>
+  );
+}
+
+// 로고는 장식이라 대표색을 쓰지 않는다(대표색은 주 행동과 활성 상태에만).
+function Logo() {
+  return (
+    <span className="flex items-center gap-2 text-sm font-bold text-foreground">
+      <Boxes aria-hidden="true" className="size-5" />
+      <span className="group-data-collapsed/sidebar:sr-only">TMI 콘솔</span>
+    </span>
+  );
+}
+
+// 아이콘은 여기(서버)에서 그려서 넘긴다. 컴포넌트 함수 자체는 client 부품의 props로 넘길 수 없다(L1).
+function SidebarNav() {
+  const items = [consoleHome, ...consoleFeatures];
+  return (
+    <nav aria-label="주 메뉴" className="flex-1 overflow-y-auto px-3 pb-3">
+      <ul className="flex flex-col gap-1">
+        {items.map((item) => {
+          const icon = <item.icon aria-hidden="true" className="size-4 shrink-0" />;
+          return (
+            <li key={item.label}>
               {item.href ? (
-                <NavLink href={item.href}>{item.label}</NavLink>
+                <NavLink href={item.href} icon={icon} label={item.label} />
               ) : (
-                // 화면이 없는 기능은 링크하지 않는다. "준비 중" 글자가 상태를 전한다.
-                <span className="flex items-center justify-between gap-2 whitespace-nowrap px-3 py-2 text-sm text-muted-foreground">
-                  {item.label}
-                  <Badge variant="secondary">준비 중</Badge>
-                </span>
+                <PendingNavItem icon={icon} label={item.label} />
               )}
             </li>
-          ))}
-        </ul>
-      </nav>
-    </aside>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
