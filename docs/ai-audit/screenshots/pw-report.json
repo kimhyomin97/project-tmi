@@ -1,0 +1,25 @@
+{
+  "collapsedAfterReload": 1,
+  "focusedAfter2Tabs": {
+    "tag": "BODY",
+    "text": "TMI 콘솔TMI 콘솔홈영어 학습준비 중자산 현황준비 ",
+    "outline": "none 0px",
+    "boxShadow": "none"
+  },
+  "desktopErrors": [],
+  "landmarks": {
+    "h1": [
+      "TMI 콘솔"
+    ],
+    "nav": [
+      "주 메뉴"
+    ],
+    "main": 1,
+    "skipLink": false,
+    "lang": "ko",
+    "title": "홈 · TMI 콘솔"
+  },
+  "drawerDialog": 1,
+  "drawerClosedByEsc": true,
+  "mobileErrors": []
+}
