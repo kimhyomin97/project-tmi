@@ -1,0 +1,169 @@
+{
+  "items": [
+    {
+      "id": "baseline",
+      "artifact": "docs/ai-audit/00-baseline.md",
+      "done": true,
+      "review_rounds": 0,
+      "rubric_scores": {
+        "note": "8단계 리뷰 대상 아님(TASK.md:119-125)"
+      }
+    },
+    {
+      "id": "ai-setup",
+      "artifact": "docs/ai-audit/01-ai-setup.md",
+      "done": true,
+      "review_rounds": 2,
+      "rubric_scores": {
+        "round_1": {
+          "근거성": 3,
+          "구체성": 3,
+          "일관성": 3,
+          "판단가능성": 4
+        },
+        "round_2": {
+          "근거성": 4,
+          "구체성": 4,
+          "일관성": 4,
+          "판단가능성": 4
+        }
+      }
+    },
+    {
+      "id": "design-system",
+      "artifact": "docs/ai-audit/02-design-system.md",
+      "done": true,
+      "review_rounds": 2,
+      "rubric_scores": {
+        "round_1": {
+          "근거성": 4,
+          "구체성": 3,
+          "일관성": 3,
+          "판단가능성": 3
+        },
+        "round_2": {
+          "근거성": 4,
+          "구체성": 4,
+          "일관성": 4,
+          "판단가능성": 4
+        }
+      }
+    },
+    {
+      "id": "code-structure",
+      "artifact": "docs/ai-audit/03-code-structure.md",
+      "done": true,
+      "review_rounds": 2,
+      "rubric_scores": {
+        "round_1": {
+          "근거성": 4,
+          "구체성": 3,
+          "일관성": 3,
+          "판단가능성": 3
+        },
+        "round_2": {
+          "근거성": 4,
+          "구체성": 4,
+          "일관성": 4,
+          "판단가능성": 4
+        }
+      }
+    },
+    {
+      "id": "research",
+      "artifact": "docs/ai-audit/04-research.md",
+      "done": true,
+      "review_rounds": 0,
+      "rubric_scores": {
+        "note": "8단계 리뷰 대상 아님(TASK.md:119-125)"
+      }
+    },
+    {
+      "id": "proposals",
+      "artifact": "docs/ai-audit/05-proposals.md",
+      "done": true,
+      "review_rounds": 4,
+      "rubric_scores": {
+        "round_1": {
+          "근거성": 3,
+          "구체성": 4,
+          "일관성": 3,
+          "판단가능성": 4
+        },
+        "round_2": {
+          "근거성": 4,
+          "구체성": 4,
+          "일관성": 3,
+          "판단가능성": 4
+        },
+        "round_3": {
+          "근거성": 5,
+          "구체성": 4,
+          "일관성": 3,
+          "판단가능성": 4
+        },
+        "round_4": {
+          "근거성": 5,
+          "구체성": 4,
+          "일관성": 4,
+          "판단가능성": 4
+        }
+      }
+    },
+    {
+      "id": "examples",
+      "artifact": "docs/ai-audit/examples/",
+      "done": true,
+      "review_rounds": 4,
+      "rubric_scores": {
+        "round_1": {
+          "근거성": 4,
+          "구체성": 3,
+          "일관성": 2,
+          "판단가능성": 3
+        },
+        "round_2": {
+          "근거성": 4,
+          "구체성": 3,
+          "일관성": 4,
+          "판단가능성": 4
+        },
+        "round_3": {
+          "근거성": 4,
+          "구체성": 4,
+          "일관성": 3,
+          "판단가능성": 4
+        },
+        "round_4": {
+          "근거성": 4,
+          "구체성": 3,
+          "일관성": 4,
+          "판단가능성": 4
+        },
+        "round_4_followup_1": {
+          "근거성": 4,
+          "구체성": 3,
+          "일관성": 3,
+          "판단가능성": 4
+        },
+        "round_4_followup_2": {
+          "근거성": 4,
+          "구체성": 4,
+          "일관성": 4,
+          "판단가능성": 4
+        },
+        "note": "라운드 4에서 구체성 3. 최대 라운드(4) 도달 후 지적을 반영하고, 새 라운드가 아닌 후속 확인 2회로 해소를 검증(reviews/examples-round-4-followup*.md)"
+      }
+    },
+    {
+      "id": "review-loop",
+      "artifact": "docs/ai-audit/reviews/",
+      "done": true,
+      "review_rounds": 4,
+      "rubric_scores": {
+        "review_files": 16,
+        "note": "01·02·03은 2라운드, 05·examples는 4라운드 + examples 후속 확인 2회"
+      }
+    }
+  ]
+}
