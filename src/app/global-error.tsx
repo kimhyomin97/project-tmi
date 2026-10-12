@@ -4,6 +4,8 @@
 // html·body·전역 CSS·다크 클래스를 여기서 직접 넣는다(Next 문서 error.md "global-error").
 import "./globals.css";
 import { Button } from "@/components/ui/button";
+import { PageContainer } from "@/components/page-container";
+import { PageHeader } from "@/components/page-header";
 
 export default function GlobalError({
   error,
@@ -16,14 +18,18 @@ export default function GlobalError({
     <html lang="ko" className="dark h-full antialiased">
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <title>오류 · TMI 콘솔</title>
-        <main className="mx-auto flex w-full max-w-5xl flex-col items-start gap-4 px-6 py-16">
-          <h1 className="text-2xl font-bold tracking-tight">콘솔을 불러오지 못했습니다</h1>
-          <p className="text-sm text-muted-foreground">
-            {error.digest
-              ? `화면 뼈대를 그리는 중 오류가 났습니다. 서버 로그에서 오류 코드 ${error.digest}를 검색하면 원인을 볼 수 있습니다.`
-              : `화면 뼈대를 그리는 중 오류가 났습니다: ${error.message}`}
-          </p>
-          <Button onClick={() => retry()}>다시 시도</Button>
+        <main className="flex-1">
+          <PageContainer className="items-start py-16">
+            <PageHeader
+              title="콘솔을 불러오지 못했습니다"
+              description={
+                error.digest
+                  ? `화면 뼈대를 그리는 중 오류가 났습니다. 서버 로그에서 오류 코드 ${error.digest}를 검색하면 원인을 볼 수 있습니다.`
+                  : `화면 뼈대를 그리는 중 오류가 났습니다: ${error.message}`
+              }
+            />
+            <Button onClick={() => retry()}>다시 시도</Button>
+          </PageContainer>
         </main>
       </body>
     </html>

@@ -6,7 +6,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/status-badge";
 import { useSidebarStore } from "@/lib/sidebar-store";
 
 /** /english 와 /english-review 가 서로를 활성으로 만들지 않게 경로 단위로 비교한다. */
@@ -51,9 +51,7 @@ export function PendingNavItem({ icon, label }: { icon: ReactNode; label: string
     >
       {icon}
       <span className="flex-1 group-data-collapsed/sidebar:sr-only">{label}</span>
-      <Badge variant="secondary" className="group-data-collapsed/sidebar:sr-only">
-        준비 중
-      </Badge>
+      <StatusBadge status="pending" className="group-data-collapsed/sidebar:sr-only" />
     </span>
   );
 }

@@ -20,7 +20,9 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* 개발용 버튼(운영 빌드에는 없음). 떠 있는 버튼은 네 모서리 어디서든 조작 요소(footer 링크·접힌 사이드바의 펼치기 버튼·☰)를
+          덮어서, 화면 흐름 맨 아래(footer 다음)에 둔다. dev에서만 페이지 끝에 약 48px 여분 스크롤이 생긴다(운영 빌드에는 없음). */}
+      <ReactQueryDevtools initialIsOpen={false} buttonPosition="relative" />
     </QueryClientProvider>
   );
 }
