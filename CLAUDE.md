@@ -10,9 +10,10 @@ BE 마이크로서비스군(`../project-tmi-*`, Spring Boot)의 프론트 콘솔
 ## 작업 루프
 
 - **plan 생략 가능**: 기존 파일 3개 이하 수정이면서 새 파일·새 의존성·`"use client"` 추가·queryKey 변경이 하나도 없을 때만. 착수 후 이 경계를 넘으면 멈추고 plan을 제시한다.
-- **plan 필수 항목**: ① `"use client"` 파일 목록 / Zustand store 필드 / queryKey 목록 ② 해당 L번호와 선택 이유 2~3줄 ③ 의존성 추가 사유(커밋 메시지에도). 실제로 없을 때만 "없음". ④ **완료 조건**: 사용자가 확인할 동작을 사용자 말로 쓴 목록("빈 칸으로 채점하면 입력칸 아래에 안내가 나온다")과 항목마다 확인 방법(`pnpm shot`·측정·테스트).
+- **plan 필수 항목**: ① `"use client"` 파일 목록 / Zustand store 필드 / queryKey 목록 ② 해당 L번호와 선택 이유 2~3줄 ③ 의존성 추가 사유(커밋 메시지에도). 실제로 없을 때만 "없음". ④ **완료 조건**: 사용자가 확인할 동작을 사용자 말로 쓴 목록("빈 칸으로 채점하면 입력칸 아래에 안내가 나온다")과 항목마다 확인 방법. 입력→결과·로딩/빈/실패 상태 같은 **동작 조건은 테스트**(테스트 이름 = 완료 조건 문장), 모양은 `pnpm shot`, 그 밖은 측정.
+- **동작 테스트는 구현 전에 쓴다**: plan 승인 뒤 테스트를 먼저 쓰고 `pnpm test`로 실패를 확인한 다음 구현한다. 구현 중 테스트를 고치거나 지우면 완료 보고에 이유를 적는다.
 - 화면 2개 이상 feature는 사용자 인터뷰 후 SPEC을 `docs/spec/<feature>.md`에 쓰고, **이어서 구현하지 말고** "`/clear` 후 그 파일을 읽고 구현하라"고 안내하며 턴을 끝낸다.
-- **완료 보고는 증거로**: ① 직접 실행한 `pnpm verify` 출력(Stop hook은 성공 시 아무것도 출력하지 않는다) ② **완료 조건별 통과/실패와 증거**(`pnpm shot <경로>` 출력과 `.shots/` 스크린샷) ③ 3줄 요약 ④ plan 대비 `git diff --stat` ⑤ 필수 3줄 재측정 — 아래 명령의 출력을 붙인다. plan과 다르면 이유를 먼저 쓴다.
+- **완료 보고는 증거로**: ① 직접 실행한 `pnpm verify`(typecheck·lint·test·build) 출력(Stop hook은 성공 시 아무것도 출력하지 않는다) ② **완료 조건별 통과/실패와 증거**(`pnpm shot <경로>` 출력과 `.shots/` 스크린샷) ③ 3줄 요약 ④ plan 대비 `git diff --stat` ⑤ 필수 3줄 재측정 — 아래 명령의 출력을 붙인다. plan과 다르면 이유를 먼저 쓴다.
   ```bash
   git grep --untracked -l '"use client"' -- src ':!src/components/ui' || echo '(use client 없음)'
   git grep --untracked -n -E 'queryKey|\[[^]]*"[^"]*"' -- 'src/features/*/queries.ts' || echo '(queryKey 없음)'
@@ -41,7 +42,7 @@ BE 마이크로서비스군(`../project-tmi-*`, Spring Boot)의 프론트 콘솔
 
 ## 스택
 
-Next.js 16 App Router · React 19 · TS · TanStack Query v5 · Zustand · Tailwind v4 · shadcn/ui(**Radix가 아닌 Base UI, base-nova**) · lucide-react · **pnpm만**(npm/yarn 금지). 새 라이브러리는 기존 스택으로 불가능할 때만 plan에서 승인받는다.
+Next.js 16 App Router · React 19 · TS · TanStack Query v5 · Zustand · Tailwind v4 · shadcn/ui(**Radix가 아닌 Base UI, base-nova**) · lucide-react · 테스트: Vitest + Testing Library + MSW(jsdom) · **pnpm만**(npm/yarn 금지). 새 라이브러리는 기존 스택으로 불가능할 때만 plan에서 승인받는다.
 - Next 문서(`node_modules/next/dist/docs/`)는 새 라우트/레이아웃 생성, `params`/`searchParams`/`cookies`/`headers`, 캐싱·`revalidate`, `next.config` 변경 때만 읽고, 읽은 경로를 보고에 적는다. 단순 컴포넌트·스타일 변경에는 적용하지 않는다.
 
 ## 아키텍처
@@ -59,7 +60,8 @@ src/
 │   └── store.ts          # (필요 시) Zustand
 ├── components/           # 공용: page-header · app-sidebar · nav-link
 │   └── ui/               # shadcn 생성물 — 수정 금지(Bash로도). 변형은 감싸는 컴포넌트로
-└── lib/  api/client.ts(유일한 HTTP 클라이언트) · env.ts(NEXT_PUBLIC_만) · env.server.ts(필요 시) · providers.tsx · console-menu.ts(메뉴 목록)
+├── lib/  api/client.ts(유일한 HTTP 클라이언트) · env.ts(NEXT_PUBLIC_만) · env.server.ts(필요 시) · providers.tsx · console-menu.ts(메뉴 목록)
+└── test/  setup.ts · server.ts(테스트용 가짜 BE, MSW)
 ```
 위반은 ESLint가 잡는다(메시지가 대안을 알려준다).
 
@@ -67,6 +69,7 @@ src/
 - **로딩·에러(L5)는 데이터를 쓰는 컴포넌트 안에서** `isPending`/`isError`로 분기해 3상태(로딩·빈 상태·실패)를 모두 그린다(모양은 디자인 문서). `error.tsx`·`loading.tsx`는 `useQuery`의 로딩·실패를 잡지 못한다. 렌더 버그 안전망은 `(console)/error.tsx`와 `global-error.tsx`가 이미 있다.
 - queryKey 값(필터·페이지·정렬)은 URL searchParams 또는 `useState`에 둔다. Zustand는 라우트를 넘어 유지돼야 하는 UI 상태(사이드바 열림 등)만.
 - 서버 전용 환경변수는 `lib/env.server.ts`에 두고 최상단에 `import "server-only";`(패키지 설치 필요). 비밀값은 되도록 BE에서 처리한다. 새 변수는 `.env.example`에도 추가한다.
+- **테스트는 대상 파일 옆 `<이름>.test.ts(x)`**. BE 응답은 테스트마다 `server.use(...)`(`@/test/server`)로 넣는다. 넣지 않은 요청은 테스트 실패다. 요소는 역할·문구로 찾는다(lint는 container·DOM 노드 접근과 `skip`·`only`를 막는다. `getByTestId`·클래스 단언은 red-team이 본다). 견본: `lib/api/client.test.ts`(BE 응답), `app/(console)/error.test.tsx`(클릭). async Server Component는 Vitest가 지원하지 않아 대상이 아니다. MSW는 테스트 전용이고, 개발 중 mock은 아래 "BE 연동" 규칙대로 `api.ts` 안에서 분기한다.
 - 새 UI는 먼저 `pnpm shadcn add <component>`. 함께 따라오는 `cn`, toast의 `sonner`·`next-themes`는 승인된 예외(보고에는 적는다). 추가 뒤 확인할 것은 디자인 문서의 "shadcn 함정".
 
 ## 디자인 시스템
