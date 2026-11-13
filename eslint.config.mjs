@@ -3,6 +3,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import tailwindcss from "eslint-plugin-tailwindcss";
+import testingLibrary from "eslint-plugin-testing-library";
 
 /**
  * 로컬 규칙: feature 간 직접 import 금지 (CLAUDE.md 아키텍처 규칙).
@@ -228,6 +229,11 @@ const NO_STYLE_BYPASS = [
   },
 ];
 
+// 테스트 건너뛰기·반전 금지(테스트 파일 전용 블록에서 쓴다).
+const SKIP_RE = "/^(skip|skipIf|runIf|only|todo|fails)$/";
+const SKIP_MSG =
+  "테스트를 건너뛰거나 하나만 실행하거나 결과를 뒤집지 않습니다. 실패하면 원인을 고치고, 테스트를 바꿔야 하면 완료 보고에 이유를 적으세요.";
+
 // 소스 전체에 적용할 확장자. .js/.jsx가 빠져 있으면 그 파일만 규칙을 통째로 우회한다.
 const SRC_FILES = ["src/**/*.{ts,tsx,js,jsx,mjs,cjs}"];
 
@@ -318,6 +324,40 @@ const eslintConfig = defineConfig([
         "error",
         ...NO_BYPASS_PROPERTIES.filter((p) => p.property !== "fetch"),
       ],
+    },
+  },
+  {
+    // 동작 테스트: 사용자가 보는 것(역할·문구)으로 요소를 찾게 한다. container.querySelector·클래스명으로 찾으면
+    // 구현을 바꿀 때마다 깨지고, 화면이 틀려도 통과하는 테스트가 된다.
+    files: ["src/**/*.{test,spec}.{ts,tsx}"],
+    ...testingLibrary.configs["flat/react"],
+  },
+  {
+    files: ["src/**/*.{test,spec}.{ts,tsx}"],
+    rules: {
+      // 통과하지 못하는 테스트를 건너뛰게 해 실패를 숨기지 않는다(삭제와 달리 diff에서 눈에 잘 안 띈다).
+      "no-restricted-properties": [
+        "error",
+        ...NO_BYPASS_PROPERTIES,
+        ...["it", "test", "describe"].flatMap((object) =>
+          ["skip", "skipIf", "only", "todo"].map((property) => ({
+            object,
+            property,
+            message: SKIP_MSG,
+          })),
+        ),
+      ],
+      // 위 목록은 it.concurrent.skip·it.runIf(false)·ctx.skip()·it.fails 같은 깊은 형태를 놓친다(레드팀 실측).
+      // 객체 깊이와 무관하게 막는다. 기존 소스 규칙(process.env·style 우회)은 덮어써지므로 함께 둔다.
+      "no-restricted-syntax": [
+        "error",
+        PROCESS_ENV_SELECTOR,
+        ...NO_STYLE_BYPASS,
+        { selector: `MemberExpression[property.name=${SKIP_RE}]`, message: SKIP_MSG },
+        { selector: `MemberExpression[property.value=${SKIP_RE}]`, message: SKIP_MSG },
+      ],
+      // 테스트는 스타일을 그리지 않는다. 영어 예문·BE 데이터("issue #123")를 색 값으로 오인하는 거짓 양성을 끈다.
+      "tmi/no-raw-design-values": "off",
     },
   },
   // Override default ignores of eslint-config-next.

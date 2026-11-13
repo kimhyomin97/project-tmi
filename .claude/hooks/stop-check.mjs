@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Stop hook: Claude가 턴을 끝내기 전에 typecheck → lint → build를 실행한다.
+ * Stop hook: Claude가 턴을 끝내기 전에 typecheck · lint · test → build를 실행한다.
  *
  * 설계 메모 (하네스 감사에서 고친 것들):
  * - 지문에 untracked 파일의 "내용"까지 포함한다. `git status --porcelain`은 새 디렉터리를
@@ -95,13 +95,14 @@ const summarize = (out) => {
     .map((l) => l.trimEnd())
     .filter((l) => l && !/^\$ /.test(l) && !/^Progress: resolved/.test(l));
   if (lines.length <= 40) return lines.join("\n");
-  const errors = lines.filter((l) => /error|Error|✖|✗|failed/i.test(l));
+  // FAIL·×(vitest 실패 테스트 이름)·❯ 파일:줄(실패 위치)도 남겨, 어느 테스트가 실패했는지 보이게 한다.
+  const errors = lines.filter((l) => /error|Error|✖|✗|×|failed|FAIL|❯ .*:\d+:\d+/i.test(l));
   return (errors.length ? errors : lines).slice(0, 40).join("\n");
 };
 
-// typecheck와 lint는 서로 가리지 않도록 항상 둘 다 실행한다.
-const results = [step("typecheck", ["typecheck"]), step("lint", ["lint"])];
-// 둘 다 통과했을 때만 build를 돌린다 (L1 위반은 여기서만 잡힌다).
+// typecheck·lint·test는 서로 가리지 않도록 항상 셋 다 실행한다(test = 동작 판정, vitest run).
+const results = [step("typecheck", ["typecheck"]), step("lint", ["lint"]), step("test", ["test"])];
+// 셋 다 통과했을 때만 build를 돌린다 (L1 위반은 여기서만 잡힌다).
 if (results.every((r) => r.ok)) results.push(step("build", ["build"]));
 
 const failed = results.filter((r) => !r.ok);
